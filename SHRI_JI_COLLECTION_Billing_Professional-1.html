@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#651d1d">
+<title>SHRI JI COLLECTION — Smart Billing</title>
+<style>
+:root{--maroon:#651d1d;--maroon2:#7d2424;--gold:#d7b56d;--bg:#f5f1ea;--card:#fff;--text:#222;--muted:#777;--border:#e5e5e5;--danger:#a30024}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;font-size:15px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.header{background:linear-gradient(135deg,var(--maroon),#481313);color:#fff;text-align:center;padding:18px 14px;box-shadow:0 3px 12px #0002;position:relative}
+.header h1{margin:0;font-size:25px;letter-spacing:.3px}.header p{margin:5px 0 0;font-size:12px;opacity:.95}
+.wrap{max-width:680px;margin:auto;padding:12px 12px 92px}
+.card{background:var(--card);border:1px solid #eee;border-radius:17px;padding:14px;margin-bottom:12px;box-shadow:0 3px 14px #0000000d}
+.card-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 10px;font-size:18px}
+label{display:block;font-size:13px;font-weight:800;margin:8px 0 5px}
+input,select{width:100%;min-height:48px;padding:12px 14px;border:1px solid #dcdcdc;border-radius:12px;background:#fff;color:#222;outline:none}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px #d7b56d33}
+.btn{min-height:48px;border:0;border-radius:12px;background:var(--maroon);color:#fff;font-weight:800;padding:11px 14px;transition:.12s}
+.btn:active{transform:scale(.98)}.btn-gold{background:var(--gold);color:#222}.btn-light{background:#f1f1f1;color:#333}.btn-danger{background:#8e1730;color:#fff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:1.4fr .7fr .8fr;gap:8px;align-items:end}
+.billno{font-size:12px;color:var(--muted);margin-bottom:8px}
+.helper{font-size:12px;color:var(--muted);margin:8px 2px 0;line-height:1.4}
+.quick-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+.quick{min-height:46px;padding:8px 4px;border:0;border-radius:11px;background:var(--gold);font-weight:900;color:#222;font-size:12px}
+.quick:active{transform:scale(.97)}
+.suggestions{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:50;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 24px #0002;overflow:hidden;max-height:280px;overflow-y:auto}
+.suggestion{padding:12px 14px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.suggestion:last-child{border-bottom:0}.suggestion b{color:var(--maroon)}
+.item{border:1px solid #eee;border-radius:12px;padding:10px;margin-top:8px;display:flex;justify-content:space-between;gap:10px;align-items:center}.item small{color:var(--muted)}.item strong{display:block;margin-top:3px}.remove{border:0;background:#f1f1f1;color:var(--danger);padding:7px 10px;border-radius:9px;font-weight:800}
+.empty{text-align:center;color:#888;padding:15px 8px}.summary div{display:flex;justify-content:space-between;gap:12px;padding:6px 0}.final{font-size:22px;font-weight:900;border-top:1px solid #ddd;margin-top:5px;padding-top:10px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.search{margin-bottom:8px}.small{font-size:12px;color:var(--muted)}
+.history-row{display:flex;justify-content:space-between;gap:12px;border:1px solid #eee;border-radius:12px;padding:10px;margin-top:8px}.history-row .right{text-align:right;white-space:nowrap}
+.sticky{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:7px;z-index:100;box-shadow:0 -4px 15px #0001}.sticky>div{max-width:680px;margin:auto;display:grid;grid-template-columns:1.3fr 1fr;gap:7px}.sticky button{min-height:50px}
+.notice{background:#fff8e8;border:1px solid #ecd79d;border-radius:12px;padding:10px;font-size:12px;color:#6d5a2b;line-height:1.45}
+@media(max-width:430px){.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:1fr 75px 88px}.quick-wrap{grid-template-columns:repeat(3,1fr)}.header h1{font-size:23px}.card{padding:13px}}
+@media print{body{background:#fff}.no-print{display:none!important}.wrap{padding:0;max-width:none}.card{box-shadow:none;border:0;padding:4px;margin:0}.header{color:#000;background:#fff;box-shadow:none;padding:5px}.header p{color:#222}.item{border:0;border-bottom:1px solid #ddd;border-radius:0}.final{font-size:20px}}
+</style>
+</head>
+<body>
+<header class="header">
+  <h1>SHRI JI COLLECTION</h1>
+  <p>तीर्थ मंदिर, सराय तरीन (संभल) – 244303</p>
+  <p>CONTACT: 9927892667 | 9758673114</p>
+</header>
+
+<main class="wrap">
+  <section class="card no-print">
+    <div class="billno">Bill No: <b id="billNo"></b></div>
+    <div class="grid2">
+      <div><label>Customer Name</label><input id="customerName" placeholder="Customer ka naam" autocomplete="name"></div>
+      <div><label>Mobile</label><input id="customerMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" autocomplete="tel"></div>
+    </div>
+
+    <label>Item / सामान</label>
+    <div style="position:relative">
+      <input id="item" autocomplete="off" placeholder="Shortcut: p, m, f, a, g, pl...">
+      <div id="suggestions" class="suggestions"></div>
+    </div>
+
+    <div class="quick-wrap" id="quickButtons"></div>
+    <div class="helper"><b>Fast typing:</b> p = Poshak • m = Mala • f = Fall • a = Astar • g = Gown • k = Kurti • pl = Plazo. Enter dabao to select.</div>
+
+    <div class="grid3" style="margin-top:4px">
+      <div><label>Price (₹)</label><input id="price" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+      <div><label>Qty</label><input id="qty" type="number" inputmode="numeric" min="1" value="1"></div>
+      <div><label>&nbsp;</label><button class="btn" id="addBtn">ADD</button></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">🧾 Current Bill <span class="small" id="itemCount">0 items</span></h2>
+    <div id="items"><div class="empty">अभी कोई item नहीं जोड़ा गया</div></div>
+  </section>
+
+  <section class="card summary">
+    <div><span>Subtotal</span><b>₹<span id="subtotal">0.00</span></b></div>
+    <div><span>Discount (20%)</span><b>- ₹<span id="discount">0.00</span></b></div>
+    <div class="final"><span>FINAL AMOUNT</span><span>₹<span id="final">0.00</span></span></div>
+  </section>
+
+  <section class="card no-print">
+    <label>Payment</label>
+    <select id="payment"><option>Cash</option><option>UPI</option><option>Card</option></select>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn btn-gold" id="saveWa">💾 Save + WhatsApp</button>
+      <button class="btn" id="printBtn">🖨️ Print / PDF</button>
+      <button class="btn btn-light" id="saveBtn">💾 Save Bill</button>
+      <button class="btn btn-danger" id="newBtn">＋ New Bill</button>
+    </div>
+  </section>
+
+  <section class="card no-print">
+    <h2 class="card-title">🏷️ Category Sales</h2>
+    <div id="categorySales" class="empty">Abhi koi sale nahi</div>
+  </section>
+
+  <section class="card no-print">
+    <h2 class="card-title">📈 Monthly Report</h2>
+    <div class="summary">
+      <div><span>This Month Bills</span><b id="monthBills">0</b></div>
+      <div><span>This Month Sale</span><b>₹<span id="monthSale">0.00</span></b></div>
+      <div><span>This Month Discount</span><b>₹<span id="monthDiscount">0.00</span></b></div>
+    </div>
+  </section>
+
+  <section class="card no-print">
+    <h2 class="card-title">📊 Sales Dashboard</h2>
+    <div class="summary">
+      <div><span>Today's Bills</span><b id="todayBills">0</b></div>
+      <div><span>Today's Sale</span><b>₹<span id="todaySale">0.00</span></b></div>
+      <div><span>Today's Discount</span><b>₹<span id="todayDiscount">0.00</span></b></div>
+      <div><span>Total Saved Bills</span><b id="allBills">0</b></div>
+    </div>
+    <button class="btn btn-danger" id="clearHistory" style="margin-top:8px">🗑️ Clear All Saved Bills</button>
+  </section>
+
+  <section class="card no-print">
+    <h2 class="card-title">📚 Saved Bills</h2>
+    <input id="historySearch" class="search" autocomplete="off" placeholder="🔎 Customer / mobile / bill no. se search...">
+    <div id="history" class="empty">कोई saved bill नहीं</div>
+  </section>
+
+  <section class="card no-print">
+    <h2 class="card-title">💾 Backup & Restore</h2>
+    <div class="notice">Billing data isi browser/device ke local storage mein continuously save hota rahega. Phone/browser change karne se pehle backup le lena.</div>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn" id="backupBtn">⬇️ Backup Data</button>
+      <button class="btn btn-light" id="restoreBtn">⬆️ Restore Data</button>
+      <input id="restoreFile" type="file" accept="application/json,.json" hidden>
+    </div>
+  </section>
+</main>
+
+<div class="sticky no-print"><div>
+  <button class="btn btn-gold" id="stickySave">💾 SAVE + WHATSAPP</button>
+  <button class="btn" id="stickyNew">＋ NEW BILL</button>
+</div></div>
+
+<script>
+'use strict';
+
+const STORE={bills:'shriji_bills_v3',counter:'shriji_counter_v3',draft:'shriji_draft_v3'};
+let items=[];
+let bills=read(STORE.bills,[]);
+let billCounter=Number(read(STORE.counter,1000));
+let currentBill='';
+
+// One place to manage all shortcuts and quick buttons.
+const PRODUCTS=[
+  ['p','Poshak'],['m','Mala'],['mu','Mukut'],['b','Bansuri'],['j','Jhula'],['sh','Singhasan'],
+  ['dm','Decorative Mala'],['kp','Krishna Poshak (Children)'],['kd','Kade (कड़े)'],['n','Necklace'],
+  ['ne','Nekar'],['h','Hair'],['dp','Devi Poshak'],['k','Kurti'],['pl','Plazo'],['f','Fall'],['a','Astar'],['g','Gown']
+].map(([key,name])=>({key,name}));
+
+const $=id=>document.getElementById(id);
+function read(key,fallback){try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}}
+function write(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){console.warn(e);return false}}
+function money(n){return Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function nextBill(){billCounter+=1;write(STORE.counter,billCounter);return 'SJ-'+billCounter}
+function saveDraft(){write(STORE.draft,{bill:currentBill,items,customerName:$('customerName').value,customerMobile:$('customerMobile').value,payment:$('payment').value})}
+function restoreDraft(){const d=read(STORE.draft,null);if(!d||!Array.isArray(d.items)||!d.items.length)return false;items=d.items;currentBill=d.bill||nextBill();$('customerName').value=d.customerName||'';$('customerMobile').value=d.customerMobile||'';$('payment').value=d.payment||'Cash';return true}
+
+function renderQuickButtons(){
+  $('quickButtons').innerHTML=PRODUCTS.map(p=>`<button class="quick" type="button" data-name="${escapeHtml(p.name)}">${escapeHtml(p.name).toUpperCase()}</button>`).join('');
+  $('quickButtons').addEventListener('click',e=>{const b=e.target.closest('.quick');if(!b)return;selectProduct(b.dataset.name,true)});
+}
+
+const itemInput=$('item'), suggestions=$('suggestions');
+function productMatches(q){
+  q=q.trim().toLowerCase();if(!q)return [];
+  return PRODUCTS.filter(p=>p.key.startsWith(q)||p.name.toLowerCase().startsWith(q)||p.name.toLowerCase().includes(q)).slice(0,8);
+}
+function showSuggestions(){
+  const matches=productMatches(itemInput.value);
+  if(!matches.length){suggestions.style.display='none';return;}
+  suggestions.innerHTML=matches.map(p=>`<div class="suggestion" data-name="${escapeHtml(p.name)}"><span><b>${escapeHtml(p.key)}</b> → ${escapeHtml(p.name)}</span><span>›</span></div>`).join('');
+  suggestions.style.display='block';
+}
+function selectProduct(name,focusPrice=false){itemInput.value=name;suggestions.style.display='none';if(focusPrice)$('price').focus();saveDraft()}
+itemInput.addEventListener('input',()=>{showSuggestions();saveDraft()});
+itemInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const q=itemInput.value.trim().toLowerCase();
+    const exact=PRODUCTS.find(p=>p.key===q)||PRODUCTS.find(p=>p.name.toLowerCase()===q);
+    if(exact){e.preventDefault();selectProduct(exact.name,true)}
+  }
+});
+suggestions.addEventListener('click',e=>{const row=e.target.closest('.suggestion');if(row)selectProduct(row.dataset.name,true)});
+document.addEventListener('click',e=>{if(!itemInput.contains(e.target)&&!suggestions.contains(e.target))suggestions.style.display='none'});
+
+function addItem(){
+  const name=itemInput.value.trim();
+  const price=Number($('price').value);
+  const qty=Math.floor(Number($('qty').value||1));
+  if(!name||!Number.isFinite(price)||price<=0||qty<1){alert('Item, price aur quantity sahi bharo.');return}
+  items.push({name,price,qty});
+  itemInput.value='';$('price').value='';$('qty').value=1;
+  render();saveDraft();itemInput.focus();
+}
+function removeItem(i){items.splice(i,1);render();saveDraft()}
+function render(){
+  const box=$('items');
+  $('itemCount').textContent=items.length+' item'+(items.length===1?'':'s');
+  if(!items.length){box.innerHTML='<div class="empty">अभी कोई item नहीं जोड़ा गया</div>'}
+  else box.innerHTML=items.map((x,i)=>`<div class="item"><div><small>${escapeHtml(x.name)}</small><strong>₹${money(x.price)} × ${x.qty}</strong></div><div style="text-align:right"><b>₹${money(x.price*x.qty)}</b><br><button class="remove" onclick="removeItem(${i})">Remove</button></div></div>`).join('');
+  const sub=items.reduce((s,x)=>s+x.price*x.qty,0),disc=sub*.20,fin=sub-disc;
+  $('subtotal').textContent=money(sub);$('discount').textContent=money(disc);$('final').textContent=money(fin);
+}
+function buildBill(){
+  if(!items.length){alert('Pehle items add karo.');return null}
+  const sub=items.reduce((s,x)=>s+x.price*x.qty,0);
+  return {no:currentBill,date:new Date().toLocaleString('en-IN'),timestamp:Date.now(),customerName:$('customerName').value.trim(),customerMobile:$('customerMobile').value.trim(),items:items.map(x=>({...x})),subtotal:sub,discount:sub*.20,final:sub*.80,payment:$('payment').value};
+}
+function persistBill(){
+  const bill=buildBill();if(!bill)return null;
+  if(bills.some(b=>b.no===bill.no)){return bills.find(b=>b.no===bill.no)}
+  bills.unshift(bill);bills=bills.slice(0,1000);write(STORE.bills,bills);return bill;
+}
+function saveBill(show=true){const bill=persistBill();if(!bill)return;saveDraft();renderHistory();renderReports();if(show)alert('Bill save ho gaya: '+bill.no);return bill}
+function whatsapp(){
+  const bill=saveBill(false);if(!bill)return;
+  let mobile=(bill.customerMobile||'').replace(/\D/g,'');if(mobile.length===10)mobile='91'+mobile;
+  if(mobile&&mobile.length!==12){alert('Customer ka 10-digit mobile number sahi bharo.');return}
+  const lines=bill.items.map(x=>`${x.name} × ${x.qty} — ₹${money(x.price*x.qty)}`).join('\n');
+  const text=`*SHRI JI COLLECTION*\nBill No: ${bill.no}\nCustomer: ${bill.customerName||'-'}${bill.customerMobile?'\nMobile: '+bill.customerMobile:''}\n\n${lines}\n\nSubtotal: ₹${money(bill.subtotal)}\nDiscount 20%: ₹${money(bill.discount)}\n*FINAL AMOUNT: ₹${money(bill.final)}*\nPayment: ${bill.payment}\n\nThank you for shopping with us 🙏`;
+  const url=mobile?'https://wa.me/'+mobile+'?text='+encodeURIComponent(text):'https://wa.me/?text='+encodeURIComponent(text);
+  window.location.href=url;
+}
+function newBill(){
+  if(items.length&&!confirm('Current bill clear karke new bill banana hai?'))return;
+  items=[];currentBill=nextBill();$('customerName').value='';$('customerMobile').value='';$('payment').value='Cash';$('item').value='';$('price').value='';$('qty').value=1;write(STORE.draft,{bill:currentBill,items:[],customerName:'',customerMobile:'',payment:'Cash'});$('billNo').textContent=currentBill;render();$('item').focus();
+}
+function dateOf(b){return b.timestamp?new Date(b.timestamp):new Date(b.date)}
+function renderHistory(){
+  const h=$('history'),q=$('historySearch').value.trim().toLowerCase();
+  if(!bills.length){h.innerHTML='<div class="empty">कोई saved bill नहीं</div>';renderReports();return}
+  const filtered=bills.map((b,i)=>({b,i})).filter(({b})=>[b.no,b.customerName,b.customerMobile,b.date,b.payment].join(' ').toLowerCase().includes(q));
+  if(!filtered.length){h.innerHTML='<div class="empty">इस search se koi bill nahi mila</div>';renderReports();return}
+  h.innerHTML=filtered.slice(0,100).map(({b,i})=>`<div class="history-row"><div><b>${escapeHtml(b.no)}</b>${b.customerName?`<br>👤 ${escapeHtml(b.customerName)}`:''}${b.customerMobile?`<br>📱 ${escapeHtml(b.customerMobile)}`:''}<br><span class="small">${escapeHtml(b.date)} • ${escapeHtml(b.payment)}</span></div><div class="right"><b>₹${money(b.final)}</b><br><button class="remove" onclick="deleteBill(${i})">Delete</button></div></div>`).join('');
+  renderReports();
+}
+function deleteBill(i){if(!confirm('Is saved bill ko delete karein?'))return;bills.splice(i,1);write(STORE.bills,bills);renderHistory();renderCategorySales()}
+function clearHistory(){if(!bills.length){alert('Koi saved bill nahi hai.');return}if(confirm('Saare saved bills delete karne hain?')){bills=[];write(STORE.bills,bills);renderHistory();renderCategorySales()}}
+function renderCategorySales(){
+  const map={};bills.forEach(b=>(b.items||[]).forEach(x=>{const k=x.name.trim();map[k]=(map[k]||0)+Number(x.qty||0)}));
+  const rows=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  $('categorySales').innerHTML=rows.length?rows.slice(0,30).map(([n,q])=>`<div class="item"><b>${escapeHtml(n)}</b><b>${q} sold</b></div>`).join(''):'<div class="empty">Abhi koi sale nahi</div>';
+}
+function renderReports(){
+  const now=new Date(),today=now.toLocaleDateString('en-IN'),month=now.getMonth(),year=now.getFullYear();
+  const todays=bills.filter(b=>dateOf(b).toLocaleDateString('en-IN')===today),monthly=bills.filter(b=>{const d=dateOf(b);return d.getMonth()===month&&d.getFullYear()===year});
+  $('todayBills').textContent=todays.length;$('todaySale').textContent=money(todays.reduce((s,b)=>s+Number(b.final||0),0));$('todayDiscount').textContent=money(todays.reduce((s,b)=>s+Number(b.discount||0),0));$('allBills').textContent=bills.length;
+  $('monthBills').textContent=monthly.length;$('monthSale').textContent=money(monthly.reduce((s,b)=>s+Number(b.final||0),0));$('monthDiscount').textContent=money(monthly.reduce((s,b)=>s+Number(b.discount||0),0));
+}
+function backupData(){
+  const data={version:3,app:'SHRI JI COLLECTION Billing',exportedAt:new Date().toISOString(),bills,counter:billCounter,draft:read(STORE.draft,null)};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='SHRI_JI_COLLECTION_Backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);alert('Backup download ho gaya. Safe place par rakh lena.');
+}
+function restoreData(file){
+  if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const d=JSON.parse(reader.result);if(!Array.isArray(d.bills))throw new Error('bad');if(!confirm('Restore karne se current billing data replace ho jayega. Continue?'))return;bills=d.bills;billCounter=Number(d.counter||1000);write(STORE.bills,bills);write(STORE.counter,billCounter);if(d.draft)write(STORE.draft,d.draft);alert('Data restore ho gaya.');location.reload()}catch{alert('Backup file valid nahi hai.')}};reader.readAsText(file)}
+
+// Fast, continuous local save.
+['customerName','customerMobile','payment','price','qty'].forEach(id=>$(id).addEventListener('input',saveDraft));
+$('payment').addEventListener('change',saveDraft);
+$('addBtn').addEventListener('click',addItem);$('saveBtn').addEventListener('click',()=>saveBill(true));$('saveWa').addEventListener('click',whatsapp);$('stickySave').addEventListener('click',whatsapp);$('printBtn').addEventListener('click',()=>window.print());$('newBtn').addEventListener('click',newBill);$('stickyNew').addEventListener('click',newBill);$('clearHistory').addEventListener('click',clearHistory);$('historySearch').addEventListener('input',renderHistory);$('backupBtn').addEventListener('click',backupData);$('restoreBtn').addEventListener('click',()=>$('restoreFile').click());$('restoreFile').addEventListener('change',e=>{restoreData(e.target.files[0]);e.target.value=''});
+$('price').addEventListener('keydown',e=>{if(e.key==='Enter')addItem()});$('qty').addEventListener('keydown',e=>{if(e.key==='Enter')addItem()});
+
+renderQuickButtons();
+if(!restoreDraft())currentBill=nextBill();
+$('billNo').textContent=currentBill;
+render();renderHistory();renderCategorySales();
+
+// Make sure a draft is written even when the browser/app is closed unexpectedly.
+window.addEventListener('pagehide',saveDraft);window.addEventListener('beforeunload',saveDraft);
+</script>
+</body>
+</html>
